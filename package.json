@@ -1,0 +1,9 @@
+{
+  "name": "afc_animation",
+  "version": "1.0.0",
+  "description": "アルカリ型燃料電池アニメーション",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  }
+}

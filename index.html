@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>アルカリ型燃料電池の原理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0f1e;
+      --surface: #111827;
+      --surface2: #1a2236;
+      --border: rgba(99,179,255,0.18);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --anode-color: #f87171;
+      --cathode-color: #60a5fa;
+      --electrolyte-color: #34d399;
+      --glow: 0 0 24px rgba(99,102,241,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 40px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5f3fc, #818cf8, #f0abfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+    .main-grid {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      gap: 20px;
+    }
+    .canvas-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), var(--glow);
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn {
+      padding: 10px 24px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #233047; }
+    .speed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      background: var(--surface2);
+      padding: 8px 16px;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+    }
+    .speed-wrap input { width: 90px; accent-color: #818cf8; }
+    
+    .legend {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .legend-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .info-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reaction-box {
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      border-left: 4px solid;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    .info-card p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ アルカリ型燃料電池の原理</h1>
+</header>
+
+<div class="main-grid">
+  <div class="canvas-card">
+    <canvas id="afc-canvas" width="940" height="520"></canvas>
+    <div class="controls">
+      <button class="btn btn-primary" id="btn-play">▶ 連続再生</button>
+      <button class="btn btn-secondary" id="btn-pause">⏸ 一時停止</button>
+      <div class="speed-wrap" style="border-color: #67e8f9; background: rgba(103, 232, 249, 0.05);">
+        <span style="color: #67e8f9;">動作温度 (T)</span>
+        <input type="range" id="temp-slider" min="0" max="100" step="1" value="25" />
+        <span id="temp-label" style="color: #67e8f9; font-weight: bold; width: 45px; display: inline-block;">25 ℃</span>
+      </div>
+    </div>
+    <div class="controls" style="margin-top: 10px;">
+      <div class="speed-wrap" style="border-color: #f87171; background: rgba(248, 113, 113, 0.05);">
+        <span style="color: #f87171;">アノード反応効率</span>
+        <input type="range" id="eff-anode" min="10" max="100" step="1" value="80" />
+        <span id="eff-anode-label" style="color: #f87171; font-weight: bold; width: 40px; display: inline-block;">80%</span>
+      </div>
+      <div class="speed-wrap" style="border-color: #34d399; background: rgba(52, 211, 153, 0.05);">
+        <span style="color: #34d399;">イオン拡散効率</span>
+        <input type="range" id="eff-ion" min="10" max="100" step="1" value="80" />
+        <span id="eff-ion-label" style="color: #34d399; font-weight: bold; width: 40px; display: inline-block;">80%</span>
+      </div>
+      <div class="speed-wrap" style="border-color: #60a5fa; background: rgba(96, 165, 250, 0.05);">
+        <span style="color: #60a5fa;">カソード反応効率</span>
+        <input type="range" id="eff-cathode" min="10" max="100" step="1" value="80" />
+        <span id="eff-cathode-label" style="color: #60a5fa; font-weight: bold; width: 40px; display: inline-block;">80%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#fb923c; box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#4ade80; box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#a78bfa; box-shadow:0 0 10px #a78bfa;"></div>OH⁻（水酸化物イオン）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#67e8f9; box-shadow:0 0 10px #67e8f9;"></div>H₂O（水分子）</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#facc15; box-shadow:0 0 10px #facc15;"></div>e⁻（電子）</div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card" style="border-color: rgba(248,113,113,0.3)">
+      <h3 style="color:#f87171">🔴 負極（アノード）での数合わせ</h3>
+      <div class="reaction-box" style="border-color:#f87171">1 H₂ + 2 OH⁻ → 2 H₂O + 2 e⁻</div>
+      <p>電極の壁で、<strong>水素1分子（H₂）</strong>と<strong>水酸化物イオン2個（OH⁻）</strong>が揃うとフラッシュと共に融合・反応します！<br>生み出された<strong>水（H₂O）2個</strong>のうち、1つは排出され、もう1つは電解液（環境）へと戻っていきます。</p>
+    </div>
+    <div class="info-card" style="border-color: rgba(96,165,250,0.3)">
+      <h3 style="color:#60a5fa">🔵 正極（カソード）での数合わせ</h3>
+      <div class="reaction-box" style="border-color:#60a5fa">1 O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻</div>
+      <p><strong>酸素1分子（O₂）</strong>、環境（電解液）から供給される<strong>水2個（H₂O）</strong>、そして導線から来た<strong>電子4個（e⁻）</strong>が壁に揃うと見事に融合！<br>新たに<strong>4つの水酸化物イオン（OH⁻）</strong>が生まれ、電解液を通って負極へ向かいます。</p>
+    </div>
+    <div class="info-card" style="border-color: rgba(52,211,153,0.3)">
+      <h3 style="color:#34d399">⚡ 全体の物質収支（総反応）</h3>
+      <div class="reaction-box" style="border-color:#34d399">2 H₂ + 1 O₂ → 2 H₂O + 電気</div>
+      <p>負極が<strong>2回</strong>反応する間に、正極が<strong>1回</strong>反応します。系全体で見ると、供給された2つのH₂と1つのO₂が完全に消費され、最終的に2つのH₂Oだけが外部に排出される完璧なサイクルです。</p>
+    </div>
+    <div class="info-card" style="border-color: rgba(103,232,249,0.3)">
+      <h3 style="color:#67e8f9">🌡️ 起電力と内部抵抗</h3>
+      <div class="reaction-box" style="border-color:#67e8f9">閉回路電圧 = 開回路電圧 - (各種抵抗による電圧降下)</div>
+      <p>理論上の電圧は<strong>「開回路電圧」</strong>ですが、電流を取り出すとアノード反応・カソード反応・イオン拡散の遅れが<strong>内部抵抗</strong>（反応抵抗・拡散抵抗）として働き、実際の<strong>「閉回路電圧」</strong>は低下します。<br>スライダーで効率を下げると各種抵抗が増大し、電圧と反応速度（電流）が低下します。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('afc-canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// --- 描画レイアウト設定 ---
+const PAD = 30;
+const ANODE_L = PAD, ANODE_R = 210;
+const CATH_L = W - 210, CATH_R = W - PAD;
+const WALL_W = 28;
+const ANOWALL_L = ANODE_R, ANOWALL_R = ANODE_R + WALL_W;
+const CATWALL_L = CATH_L - WALL_W, CATWALL_R = CATH_L;
+const ELEC_L = ANOWALL_R + 15, ELEC_R = CATWALL_L - 15;
+
+// 回路やラベルが重ならないように上部に余裕を持たせる
+const TOP = 180, BOT = H - 20, MID = (TOP + BOT) / 2;
+const WIRE_Y = 90;
+
+// --- 色設定 ---
+const COL = {
+  h2: '#fb923c', o2: '#4ade80', oh: '#a78bfa',
+  h2o: '#67e8f9', elec: '#facc15'
+};
+
+// --- グローバルステート ---
+let speed = 1.0;
+let currentTemp = 25; // 摂氏(℃)
+let effAnode = 0.8;
+let effIon = 0.8;
+let effCathode = 0.8;
+
+let running = true;
+let t = 0;
+let lastT = null;
+let animId = null;
+
+let particles = [];
+let flashes = [];
+let scheduledSpawns = [];
+
+// --- 電極での待機キュー（数合わせ用） ---
+const aQ = { h2: 0, oh: 0 };
+const cQ = { o2: 0, e: 0, h2o: 0 };
+
+// --- パーティクルクラス ---
+class Particle {
+  constructor(type, x, y, opts = {}) {
+    this.type = type; 
+    this.x = x; 
+    this.y = y;
+    this.vx = opts.vx || 0; 
+    this.vy = opts.vy || 0;
+    this.size = opts.size || 11;
+    this.alpha = opts.alpha || 1;
+    this.age = 0;
+    this.dead = false;
+    this.trail = []; 
+    this.trailLen = opts.trailLen || 0;
+    this.pulse = Math.random() * Math.PI * 2;
+    
+    // ターゲット追従用
+    this.seeking = opts.seeking || false;
+    this.targetX = opts.targetX; 
+    this.targetY = opts.targetY;
+    this.seekSpeed = opts.seekSpeed || 2;
+    this.onReach = opts.onReach || null;
+    
+    // 経路（ウェイポイント）用
+    this.waypoints = opts.waypoints || null;
+    this.wpIdx = 0;
+
+    // 背景の漂う粒子用
+    this.ambient = opts.ambient || false;
+  }
+
+  update() {
+    this.age += speed;
+    
+    if (this.trailLen > 0) {
+      this.trail.push({ x: this.x, y: this.y });
+      if (this.trail.length > this.trailLen) this.trail.shift();
+    }
+    
+    if (this.waypoints) {
+      const wp = this.waypoints[this.wpIdx];
+      const dx = wp.x - this.x, dy = wp.y - this.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 5) {
+        this.wpIdx++;
+        if (this.wpIdx >= this.waypoints.length) { 
+          this.dead = true;
+          if (this.onReach) this.onReach(this);
+          return; 
+        }
+      } else {
+        const s = Math.min(3.8 * speed, d);
+        this.x += (dx / d) * s; 
+        this.y += (dy / d) * s;
+      }
+      return;
+    }
+    
+    if (this.seeking) {
+      const dx = this.targetX - this.x, dy = this.targetY - this.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 5) {
+        this.dead = true;
+        if (this.onReach) this.onReach(this);
+        return;
+      }
+      const s = Math.min(this.seekSpeed * speed, d);
+      this.x += (dx / d) * s; 
+      this.y += (dy / d) * s;
+      return;
+    }
+    
+    this.x += this.vx * speed; 
+    this.y += this.vy * speed;
+    
+    if (this.ambient) {
+      if (this.x < ELEC_L + 5 || this.x > ELEC_R - 5) this.vx *= -1;
+      if (this.y < TOP + 5 || this.y > BOT - 5) this.vy *= -1;
+    } else {
+      if (this.x < -50 || this.x > W + 50 || this.y < -50 || this.y > H + 50) {
+        this.dead = true;
+      }
+    }
+  }
+
+  draw() {
+    const r = this.size + Math.sin(this.pulse + this.age * 0.08) * 1.5;
+    const c = COL[this.type] || '#fff';
+    
+    ctx.globalAlpha = this.alpha;
+    
+    if (this.trail.length > 1) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(this.trail[0].x, this.trail[0].y);
+      for (let i = 1; i < this.trail.length; i++) {
+        ctx.lineTo(this.trail[i].x, this.trail[i].y);
+      }
+      ctx.strokeStyle = c;
+      ctx.lineWidth = r * 0.8;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = 0.3 * this.alpha;
+      ctx.stroke();
+      ctx.restore();
+    }
+    
+    ctx.globalAlpha = this.alpha;
+
+    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 2.2);
+    g.addColorStop(0, c + 'cc'); 
+    g.addColorStop(1, c + '00');
+    ctx.beginPath(); 
+    ctx.arc(this.x, this.y, r * 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = g; 
+    ctx.fill();
+    
+    ctx.beginPath(); 
+    ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = c; 
+    ctx.fill();
+    
+    if (r > 8) {
+      ctx.fillStyle = '#000'; 
+      ctx.textAlign = 'center'; 
+      ctx.textBaseline = 'middle';
+      ctx.font = `bold ${r * 0.85}px sans-serif`;
+      const labels = { h2: 'H₂', o2: 'O₂', oh: 'OH⁻', h2o: 'H₂O', elec: 'e⁻' };
+      ctx.fillText(labels[this.type] || '', this.x, this.y);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+// --- 数合わせキュー（待機粒子）の描画 ---
+function drawDockedParticle(type, x, y, size) {
+  const c = COL[type];
+  ctx.beginPath(); 
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fillStyle = c; 
+  ctx.fill();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  if (size > 6) {
+    ctx.fillStyle = '#000'; 
+    ctx.textAlign = 'center'; 
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${size * 0.8}px sans-serif`;
+    const labels = { h2: 'H₂', o2: 'O₂', oh: 'OH⁻', h2o: 'H₂O', elec: 'e⁻' };
+    ctx.fillText(labels[type] || '', x, y);
+  }
+}
+
+function drawQueues() {
+  const r = 9;
+  const gap = r * 2.2;
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  
+  // アノード側待機: 縦方向は中央（MID）を中心に整列させる
+  for(let i=0; i<aQ.h2; i++) {
+    const y = MID - ((aQ.h2 - 1) * gap) / 2 + i * gap;
+    drawDockedParticle('h2', nodeAnode - 12, y, r);
+  }
+  for(let i=0; i<aQ.oh; i++) {
+    const y = MID - ((aQ.oh - 1) * gap) / 2 + i * gap;
+    drawDockedParticle('oh', nodeAnode + 12, y, r);
+  }
+  
+  // カソード側待機: すべて中央（MID）の反応ポイントに集める
+  for(let i=0; i<cQ.o2; i++) {
+    const y = MID - ((cQ.o2 - 1) * gap) / 2 + i * gap;
+    drawDockedParticle('o2', nodeCathode + 12, y, r);
+  }
+  for(let i=0; i<cQ.h2o; i++) {
+    const y = MID - ((cQ.h2o - 1) * gap) / 2 + i * gap;
+    drawDockedParticle('h2o', nodeCathode - 12, y, r);
+  }
+  for(let i=0; i<cQ.e; i++) {
+    const ey = MID - ((cQ.e - 1) * (r * 1.8)) / 2 + i * (r * 1.8);
+    drawDockedParticle('elec', nodeCathode, ey, 7.5);
+  }
+}
+
+// --- フラッシュ効果の描画 ---
+function drawFlashes() {
+  for(let i = flashes.length - 1; i >= 0; i--) {
+    let f = flashes[i];
+    ctx.save();
+    ctx.globalAlpha = f.life;
+    let g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 50);
+    g.addColorStop(0, f.color);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    
+    f.life -= 0.04 * Math.max(0.5, speed);
+    if(f.life <= 0) flashes.splice(i, 1);
+  }
+}
+
+// --- スポーン管理と反応ロジック ---
+function scheduleSpawn(delay, fn) {
+  scheduledSpawns.push({ timeLeft: delay, execute: fn });
+}
+
+function spawnH2ToAnode() {
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  const y = MID + (Math.random() - 0.5) * 60;
+  particles.push(new Particle('h2', ANODE_L - 20, y, {
+    seeking: true, targetX: nodeAnode, targetY: MID + (Math.random()-0.5)*20, seekSpeed: 2.2, trailLen: 8,
+    onReach: () => { aQ.h2++; }
+  }));
+}
+
+function spawnO2ToCathode() {
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  const y = MID + (Math.random() - 0.5) * 60;
+  particles.push(new Particle('o2', CATH_R + 20, y, {
+    seeking: true, targetX: nodeCathode, targetY: MID + (Math.random()-0.5)*20, seekSpeed: 2.0, trailLen: 8,
+    onReach: () => { cQ.o2++; }
+  }));
+}
+
+function spawnH2OToCathode() {
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  const x = ELEC_L + 20 + Math.random() * (ELEC_R - ELEC_L - 40);
+  const y = (Math.random() > 0.5) ? TOP + 10 : BOT - 10;
+  particles.push(new Particle('h2o', x, y, {
+    seeking: true, targetX: nodeCathode, targetY: MID + (Math.random()-0.5)*20, seekSpeed: 1.6, trailLen: 8,
+    onReach: () => { cQ.h2o++; }
+  }));
+}
+
+function triggerAnodeReaction() {
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+
+  // 反応は常に中心（MID）で発生させる
+  flashes.push({ x: nodeAnode, y: MID, life: 1.0, color: '#f87171' });
+  
+  // 2 e- を回路へ
+  for(let i=0; i<2; i++) {
+    const targetY = MID + (Math.random()-0.5)*20; 
+    particles.push(new Particle('elec', nodeAnode, MID, {
+      trailLen: 12,
+      waypoints: [
+        { x: nodeAnode, y: WIRE_Y },
+        { x: nodeCathode, y: WIRE_Y },
+        { x: nodeCathode, y: targetY }
+      ],
+      onReach: () => { cQ.e++; }
+    }));
+  }
+  
+  // 1 H2O を外部へ排出
+  particles.push(new Particle('h2o', nodeAnode, MID, {
+    seeking: true, targetX: ANODE_L - 60, targetY: MID + (Math.random()-0.5)*40, seekSpeed: 2.0, trailLen: 6,
+    onReach: (p) => { p.dead = true; }
+  }));
+  
+  // 1 H2O を電解液（環境）へ戻す
+  particles.push(new Particle('h2o', nodeAnode, MID, {
+    seeking: true, targetX: ELEC_L + 20 + Math.random()*100, targetY: MID + (Math.random()-0.5)*100, seekSpeed: 1.5, trailLen: 8,
+    onReach: (p) => { 
+      p.ambient = true; 
+      p.seeking = false; 
+      p.vx = (Math.random()-0.5)*0.5; 
+      p.vy = (Math.random()-0.5)*0.5; 
+      p.alpha = 0.5; 
+    }
+  }));
+}
+
+function triggerCathodeReaction() {
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  
+  flashes.push({ x: nodeCathode, y: MID, life: 1.0, color: '#60a5fa' });
+  
+  // 4 OH- をアノードへ移動
+  for(let i=0; i<4; i++) {
+    particles.push(new Particle('oh', nodeCathode, MID, {
+      seeking: true, targetX: nodeAnode, targetY: MID + (Math.random()-0.5)*40, seekSpeed: 1.8, trailLen: 8,
+      onReach: () => { aQ.oh++; }
+    }));
+  }
+}
+
+function checkReactions() {
+  if (aQ.h2 >= 1 && aQ.oh >= 2) {
+    aQ.h2 -= 1;
+    aQ.oh -= 2;
+    triggerAnodeReaction();
+  }
+  if (cQ.o2 >= 1 && cQ.e >= 4 && cQ.h2o >= 2) {
+    cQ.o2 -= 1;
+    cQ.e -= 4;
+    cQ.h2o -= 2;
+    triggerCathodeReaction();
+  }
+}
+
+// サイクル供給ロジック
+let cycleTicks = 160; 
+function updateSpawns() {
+  for(let i = scheduledSpawns.length - 1; i >= 0; i--) {
+    scheduledSpawns[i].timeLeft -= speed;
+    if (scheduledSpawns[i].timeLeft <= 0) {
+      scheduledSpawns[i].execute();
+      scheduledSpawns.splice(i, 1);
+    }
+  }
+
+  cycleTicks += speed;
+  if (cycleTicks >= 160) {
+    cycleTicks -= 160;
+    
+    if (aQ.h2 < 6) {
+      spawnH2ToAnode();
+      scheduleSpawn(20, spawnH2ToAnode);
+    }
+    if (cQ.o2 < 3) {
+      scheduleSpawn(10, spawnO2ToCathode);
+    }
+    if (cQ.h2o < 4) {
+      scheduleSpawn(5, spawnH2OToCathode);
+      scheduleSpawn(25, spawnH2OToCathode);
+    }
+  }
+}
+
+// --- 背景・装置の描画 ---
+function drawRoundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function drawMesh(x, y, w, h, color) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.globalAlpha = 0.35;
+  ctx.beginPath();
+  const step = 8;
+  for (let i = -h; i < w + h; i += step) {
+    ctx.moveTo(x + i, y); ctx.lineTo(x + i - h, y + h);
+    ctx.moveTo(x + i, y); ctx.lineTo(x + i + h, y + h);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawSystem() {
+  ctx.fillStyle = '#0d1425'; 
+  ctx.fillRect(0, 0, W, H);
+
+  // アノード空間
+  let gAnode = ctx.createLinearGradient(ANODE_L, 0, ANOWALL_L, 0);
+  gAnode.addColorStop(0, 'rgba(248,113,113,0.06)'); gAnode.addColorStop(1, 'rgba(248,113,113,0.18)');
+  ctx.fillStyle = gAnode; 
+  drawRoundRect(ANODE_L, TOP, ANOWALL_L - ANODE_L, BOT - TOP, 12); ctx.fill();
+  ctx.strokeStyle = 'rgba(248,113,113,0.4)'; ctx.lineWidth = 1.5;
+  drawRoundRect(ANODE_L, TOP, ANOWALL_L - ANODE_L, BOT - TOP, 12); ctx.stroke();
+
+  // カソード空間
+  let gCathode = ctx.createLinearGradient(CATWALL_R, 0, CATH_R, 0);
+  gCathode.addColorStop(0, 'rgba(96,165,250,0.18)'); gCathode.addColorStop(1, 'rgba(96,165,250,0.06)');
+  ctx.fillStyle = gCathode; 
+  drawRoundRect(CATWALL_R, TOP, CATH_R - CATWALL_R, BOT - TOP, 12); ctx.fill();
+  ctx.strokeStyle = 'rgba(96,165,250,0.4)'; ctx.lineWidth = 1.5;
+  drawRoundRect(CATWALL_R, TOP, CATH_R - CATWALL_R, BOT - TOP, 12); ctx.stroke();
+
+  // 電解液空間
+  let gElec = ctx.createLinearGradient(ELEC_L, 0, ELEC_R, 0);
+  gElec.addColorStop(0, 'rgba(52,211,153,0.15)'); gElec.addColorStop(0.5, 'rgba(52,211,153,0.05)'); gElec.addColorStop(1, 'rgba(52,211,153,0.15)');
+  ctx.fillStyle = gElec; ctx.fillRect(ELEC_L, TOP, ELEC_R - ELEC_L, BOT - TOP);
+  ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 1;
+  ctx.strokeRect(ELEC_L, TOP, ELEC_R - ELEC_L, BOT - TOP);
+
+  // 電極壁（網目付き）
+  let gWallAn = ctx.createLinearGradient(ANOWALL_L, 0, ANOWALL_R, 0);
+  gWallAn.addColorStop(0, '#374151'); gWallAn.addColorStop(1, '#4b5563');
+  ctx.fillStyle = gWallAn; ctx.fillRect(ANOWALL_L, TOP, WALL_W, BOT - TOP);
+  drawMesh(ANOWALL_L, TOP, WALL_W, BOT - TOP, '#fca5a5');
+
+  let gWallCa = ctx.createLinearGradient(CATWALL_L, 0, CATWALL_R, 0);
+  gWallCa.addColorStop(0, '#4b5563'); gWallCa.addColorStop(1, '#374151');
+  ctx.fillStyle = gWallCa; ctx.fillRect(CATWALL_L, TOP, WALL_W, BOT - TOP);
+  drawMesh(CATWALL_L, TOP, WALL_W, BOT - TOP, '#93c5fd');
+
+  // 外部回路
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(250,204,21,0.4)'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(nodeAnode, TOP); ctx.lineTo(nodeAnode, WIRE_Y);
+  ctx.lineTo(nodeCathode, WIRE_Y); ctx.lineTo(nodeCathode, TOP);
+  ctx.stroke();
+  
+  const midX = W / 2;
+  ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(midX - 45, WIRE_Y);
+  for (let i = 0; i < 7; i++) ctx.lineTo(midX - 35 + i * 12, WIRE_Y - (i % 2 === 0 ? 10 : -10));
+  ctx.lineTo(midX + 45, WIRE_Y); ctx.stroke();
+  ctx.restore();
+  
+  ctx.font = '11px sans-serif'; ctx.fillStyle = 'rgba(250,204,21,0.8)'; ctx.textAlign = 'center';
+  ctx.fillText('外部回路（モーターなど）', W / 2, WIRE_Y + 28);
+
+  ctx.font = 'bold 15px sans-serif'; ctx.fillStyle = '#f87171';
+  ctx.fillText('負極（アノード）', nodeAnode, TOP - 18);
+
+  ctx.font = 'bold 15px sans-serif'; ctx.fillStyle = '#60a5fa';
+  ctx.fillText('正極（カソード）', nodeCathode, TOP - 18);
+
+  ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#34d399';
+  ctx.fillText('電解液（KOH水溶液）', W / 2, TOP - 18);
+
+  // ネルンスト式による理論起電力の計算
+  const T_kelvin = 273.15 + currentTemp;
+  const EMF = 1.229 - 0.000846 * (T_kelvin - 298.15); // 開回路電圧
+
+  // 外部回路の負荷抵抗を 1000 Ω (1 kΩ) と仮定
+  const R_load = 1000.0; 
+
+  // 各種内部抵抗（効率100%なら0、効率が落ちると抵抗増大）
+  const rAnode = 150.0 * (1.0 - effAnode);
+  const rIon = 200.0 * (1.0 - effIon);
+  const rCathode = 350.0 * (1.0 - effCathode);
+  const rInt = rAnode + rIon + rCathode;
+  
+  // 回路に流れる電流 I = E / (R_load + rInt)
+  const current_A = EMF / (R_load + rInt);
+  const current_mA = current_A * 1000.0;
+  
+  // 閉回路電圧 = 外部回路にかかる電圧 (V = I * R_load)
+  const V_cell = current_A * R_load;
+  
+  // 電流に応じてアニメーション速度を決定（1.23mAのときにspeed=1.5程度になるようにスケール）
+  speed = Math.max(0.05, current_mA * (1.5 / 1.229));
+
+  // 抵抗値を電極近くに表示
+  ctx.font = '12px "JetBrains Mono", monospace'; 
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fca5a5';
+  ctx.fillText(`反応抵抗: ${rAnode.toFixed(0)} Ω`, nodeAnode, TOP - 42);
+  ctx.fillStyle = '#93c5fd';
+  ctx.fillText(`反応抵抗: ${rCathode.toFixed(0)} Ω`, nodeCathode, TOP - 42);
+  ctx.fillStyle = '#6ee7b7';
+  ctx.fillText(`拡散抵抗: ${rIon.toFixed(0)} Ω`, W / 2, TOP - 42);
+
+  // 起電力表示パネル (Voltmeter)
+  ctx.save();
+  ctx.fillStyle = 'rgba(10, 15, 30, 0.9)';
+  ctx.strokeStyle = '#67e8f9';
+  ctx.lineWidth = 1.5;
+  const panelW = 340, panelH = 58;
+  const panelX = W / 2 - panelW / 2;
+  const panelY = WIRE_Y - panelH - 16; 
+  drawRoundRect(panelX, panelY, panelW, panelH, 6);
+  ctx.fill();
+  ctx.stroke();
+  
+  ctx.font = '12px "JetBrains Mono", monospace'; 
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; 
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`開回路(理論)電圧: ${EMF.toFixed(3)} V`, W / 2, panelY + 20);
+  
+  ctx.font = 'bold 15px "JetBrains Mono", monospace'; 
+  ctx.fillStyle = '#facc15'; 
+  ctx.fillText(`閉回路電圧: ${V_cell.toFixed(3)} V  |  電流: ${current_mA.toFixed(2)} mA`, W / 2, panelY + 42);
+  ctx.restore();
+}
+
+function drawWireCurrent() {
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  const nodeCathode = (CATWALL_L + CATWALL_R) / 2;
+  const off = (t * 2.0 * speed) % 40;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(250,204,21,0.8)'; ctx.lineWidth = 2.5;
+  ctx.setLineDash([10, 8]); ctx.lineDashOffset = -off;
+  ctx.beginPath(); ctx.moveTo(nodeAnode, WIRE_Y); ctx.lineTo(nodeCathode, WIRE_Y);
+  ctx.stroke(); ctx.restore();
+  ctx.fillStyle = '#facc15';
+  ctx.beginPath(); ctx.moveTo(nodeCathode - 5, WIRE_Y); ctx.lineTo(nodeCathode - 18, WIRE_Y - 7); ctx.lineTo(nodeCathode - 18, WIRE_Y + 7); 
+  ctx.closePath(); ctx.fill();
+}
+
+// --- システム初期化（種まき） ---
+function initSystem() {
+  particles = [];
+  scheduledSpawns = [];
+  flashes = [];
+  cycleTicks = 160; 
+  aQ.h2 = 0; aQ.oh = 0;
+  cQ.o2 = 0; cQ.e = 0; cQ.h2o = 0;
+  
+  const nodeAnode = (ANOWALL_L + ANOWALL_R) / 2;
+  
+  for(let i=0; i<8; i++) {
+    particles.push(new Particle('oh', CATWALL_L - 20 - i*30, MID + (Math.random()-0.5)*80, {
+      seeking: true, targetX: nodeAnode, targetY: MID + (Math.random()-0.5)*40, seekSpeed: 1.8, trailLen: 8,
+      onReach: () => { aQ.oh++; }
+    }));
+  }
+  
+  for(let i=0; i<6; i++) {
+    particles.push(new Particle('oh', ELEC_L + 20 + Math.random()*150, MID + (Math.random()-0.5)*120, {
+      vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5, ambient: true, alpha: 0.3
+    }));
+  }
+}
+
+// --- メインループ ---
+function loop(ts) {
+  if (!running) {
+    animId = requestAnimationFrame(loop);
+    return;
+  }
+  
+  if (lastT === null) lastT = ts;
+  lastT = ts;
+  t += speed;
+
+  updateSpawns();
+  checkReactions();
+
+  particles.forEach(p => p.update());
+  particles = particles.filter(p => !p.dead);
+
+  drawSystem();
+  drawWireCurrent();
+  drawFlashes();
+  particles.forEach(p => p.draw());
+  drawQueues(); 
+
+  animId = requestAnimationFrame(loop);
+}
+
+// --- UIコントロール ---
+document.getElementById('btn-play').onclick = () => { running = true; };
+document.getElementById('btn-pause').onclick = () => { running = false; };
+
+const tempSlider = document.getElementById('temp-slider');
+const tempLabel = document.getElementById('temp-label');
+tempSlider.oninput = () => {
+  currentTemp = parseFloat(tempSlider.value);
+  tempLabel.textContent = currentTemp + ' ℃';
+};
+
+const setupSlider = (id, labelId, onChange) => {
+  const s = document.getElementById(id);
+  const l = document.getElementById(labelId);
+  s.oninput = () => {
+    const val = parseFloat(s.value);
+    l.textContent = val + '%';
+    onChange(val / 100);
+  };
+};
+
+setupSlider('eff-anode', 'eff-anode-label', v => effAnode = v);
+setupSlider('eff-ion', 'eff-ion-label', v => effIon = v);
+setupSlider('eff-cathode', 'eff-cathode-label', v => effCathode = v);
+
+// --- 初期化 ---
+initSystem();
+animId = requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
