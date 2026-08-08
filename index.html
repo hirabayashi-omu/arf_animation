@@ -192,7 +192,7 @@
 <!-- タブバー -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-elec-btn">⚗️ 水の電気分解（アルカリ性）</button>
-  <button class="tab-btn" id="tab-afc-btn">🔋 アルカリ型燃料電池（AFC）</button>
+  <button class="tab-btn" id="tab-afc-btn">🔋 燃料電池（FC）</button>
 </div>
 
 <!-- ── AFC タブ ── -->
@@ -200,6 +200,15 @@
   <div class="canvas-card">
     <canvas id="afc-canvas" width="940" height="520"></canvas>
     <div class="controls">
+      <div class="speed-wrap" style="border-color:#a78bfa;background:rgba(167,139,250,0.05); margin-right:auto;">
+        <span style="color:#a78bfa; font-weight:bold;">電池タイプ</span>
+        <select id="fc-type-select" style="background:#111827; color:#fff; border:1px solid rgba(167,139,250,0.5); border-radius:8px; padding:4px 8px; outline:none; font-family:inherit; font-size:0.9rem; cursor:pointer;">
+          <option value="AFC">AFC（アルカリ形）</option>
+          <option value="PEFC">PEFC（固体高分子形）</option>
+          <option value="MCFC">MCFC（溶融炭酸塩形）</option>
+          <option value="SOFC">SOFC（固体酸化物形）</option>
+        </select>
+      </div>
       <button class="btn btn-primary" id="afc-btn-play">▶ 連続再生</button>
       <button class="btn btn-secondary" id="afc-btn-pause">⏸ 一時停止</button>
       <div class="speed-wrap" style="border-color:#67e8f9;background:rgba(103,232,249,0.05);">
@@ -226,21 +235,21 @@
       </div>
     </div>
   </div>
-  <div class="reaction-card">
+  <div class="reaction-card" id="afc-reaction-card">
     <div class="reaction-item" style="border-color:#f87171;">
       <div class="eq-label" style="color:#f87171;">負極（−）酸化反応</div>
-      <div style="color:#e2e8f0;">H₂ + 2 OH⁻ → 2 H₂O + 2 e⁻</div>
+      <div id="afc-eq-anode" style="color:#e2e8f0;">H₂ + 2 OH⁻ → 2 H₂O + 2 e⁻</div>
     </div>
     <div class="reaction-item" style="border-color:#60a5fa;">
       <div class="eq-label" style="color:#60a5fa;">正極（+）還元反応</div>
-      <div style="color:#e2e8f0;">O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻</div>
+      <div id="afc-eq-cathode" style="color:#e2e8f0;">O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻</div>
     </div>
     <div class="reaction-item" style="border-color:#34d399;">
       <div class="eq-label" style="color:#34d399;">総反応</div>
-      <div style="color:#e2e8f0;">2 H₂ + O₂ → 2 H₂O</div>
+      <div id="afc-eq-total" style="color:#e2e8f0;">2 H₂ + O₂ → 2 H₂O</div>
     </div>
   </div>
-  <div class="legend">
+  <div class="legend" id="afc-legend">
     <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
     <div class="legend-item"><div class="legend-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
     <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 10px #a78bfa;"></div>OH⁻（水酸化物イオン）</div>
@@ -256,6 +265,13 @@
     <div class="controls">
       <button class="btn btn-primary" id="el-btn-play">▶ 連続再生</button>
       <button class="btn btn-secondary" id="el-btn-pause">⏸ 一時停止</button>
+      <div class="speed-wrap" style="border-color:#34d399;background:rgba(52,211,153,0.05); margin-right:auto;">
+        <span style="color:#34d399; font-weight:bold;">電解液タイプ</span>
+        <select id="el-type-select" style="background:#111827; color:#fff; border:1px solid rgba(52,211,153,0.5); border-radius:8px; padding:4px 8px; outline:none; font-family:inherit; font-size:0.9rem; cursor:pointer;">
+          <option value="alkaline">アルカリ性（KOH水溶液など）</option>
+          <option value="acidic">酸性（PEM・希硫酸など）</option>
+        </select>
+      </div>
       <div class="speed-wrap" style="border-color:#f9a8d4;background:rgba(249,168,212,0.05);">
         <span style="color:#f9a8d4;">印加電圧</span>
         <input type="range" id="el-voltage" min="130" max="1200" step="1" value="180" />
@@ -266,18 +282,18 @@
   <div class="reaction-card">
     <div class="reaction-item" style="border-color:#60a5fa;">
       <div class="eq-label" style="color:#60a5fa;">陰極（−）還元反応</div>
-      <div style="color:#e2e8f0;">2 H₂O + 2 e⁻ → H₂ + 2 OH⁻</div>
+      <div id="el-eq-cathode" style="color:#e2e8f0;">2 H₂O + 2 e⁻ → H₂ + 2 OH⁻</div>
     </div>
     <div class="reaction-item" style="border-color:#f87171;">
       <div class="eq-label" style="color:#f87171;">陽極（+）酸化反応</div>
-      <div style="color:#e2e8f0;">4 OH⁻ → O₂ + 2 H₂O + 4 e⁻</div>
+      <div id="el-eq-anode" style="color:#e2e8f0;">4 OH⁻ → O₂ + 2 H₂O + 4 e⁻</div>
     </div>
     <div class="reaction-item" style="border-color:#34d399;">
       <div class="eq-label" style="color:#34d399;">総反応</div>
-      <div style="color:#e2e8f0;">2 H₂O → 2 H₂ + O₂</div>
+      <div id="el-eq-total" style="color:#e2e8f0;">2 H₂O → 2 H₂ + O₂</div>
     </div>
   </div>
-  <div class="legend">
+  <div class="legend" id="el-legend">
     <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
     <div class="legend-item"><div class="legend-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
     <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 10px #a78bfa;"></div>OH⁻（水酸化物イオン）</div>
@@ -315,9 +331,11 @@ tabElecBtn.onclick = () => {
 // =====================================================================
 // 共通ユーティリティ
 // =====================================================================
+let currentFCType = 'AFC';
 const COL = {
   h2: '#fb923c', o2: '#4ade80', oh: '#a78bfa',
-  h2o: '#67e8f9', elec: '#facc15'
+  h2o: '#67e8f9', elec: '#facc15',
+  hplus: '#f43f5e', ominus: '#f97316', co3: '#14b8a6', co2: '#94a3b8'
 };
 
 function drawRoundRectCtx(c, x, y, w, h, r) {
@@ -366,8 +384,8 @@ function drawMeshCtx(c, x, y, w, h, color) {
   let effAnode = 0.8, effIon = 0.8, effCathode = 0.8;
   let running = true, t = 0, animId = null;
   let particles = [], flashes = [], scheduledSpawns = [];
-  const aQ = { h2: 0, oh: 0 };
-  const cQ = { o2: 0, e: 0, h2o: 0 };
+  let aQ = { h2: 0, oh: 0 };
+  let cQ = { o2: 0, e: 0, h2o: 0 };
 
   class Particle {
     constructor(type, x, y, opts = {}) {
@@ -410,7 +428,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
         const d  = Math.sqrt(dx*dx + dy*dy);
         if (d < 5) { this.dead = true; if (this.onReach) this.onReach(this); return; }
         let dynSeekSpeed = this.seekSpeed;
-        if (this.type === 'oh') dynSeekSpeed *= Math.max(0.1, effIon);
+        if (['oh','hplus','ominus','co3'].includes(this.type)) dynSeekSpeed *= Math.max(0.1, effIon);
         
         // 電流が極端に落ちても視覚的に完全にフリーズしないよう最低速度(0.3)を保証
         const visualSpeed = Math.max(0.3, speed);
@@ -419,12 +437,15 @@ function drawMeshCtx(c, x, y, w, h, color) {
       }
       // アンビエント粒子（H₂O）は電圧に依存せず固定速度で漂う
       let _mv = this.ambient ? 1.0 : speed;
-      if (this.type === 'oh') _mv *= Math.max(0.1, effIon);
+      if (['oh','hplus','ominus','co3'].includes(this.type)) _mv *= Math.max(0.1, effIon);
       this.x += this.vx*_mv; this.y += this.vy*_mv;
       if (this.ambient) {
         // H₂O はセル全体で漂う、その他イオンは電解質帯内
-        const _xMin = this.type==='h2o' ? ANODE_L+8 : ELEC_L+5;
-        const _xMax = this.type==='h2o' ? CATH_R-8  : ELEC_R-5;
+        // H₂O はセル全体で漂う、CO2はカソード側で漂う、その他イオンは電解質帯内
+        let _xMin = ELEC_L+5, _xMax = ELEC_R-5;
+        if (this.type === 'h2o') { _xMin = ANODE_L+8; _xMax = CATH_R-8; }
+        else if (this.type === 'co2') { _xMin = CATWALL_R-5; _xMax = CATH_R-5; }
+        
         if (this.x < _xMin || this.x > _xMax) this.vx *= -1;
         if (this.y < TOP+5 || this.y > BOT-5) this.vy *= -1;
       } else {
@@ -433,6 +454,16 @@ function drawMeshCtx(c, x, y, w, h, color) {
     }
     draw() {
       const r = this.size + Math.sin(this.pulse + this.age*0.08)*1.5;
+      if (this.type === 'vacancy') {
+        ctx.globalAlpha = this.alpha;
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.arc(this.x, this.y, r, 0, Math.PI*2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        return;
+      }
       const c = COL[this.type] || '#fff';
       ctx.globalAlpha = this.alpha;
       if (this.trail.length > 1) {
@@ -450,7 +481,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       if (r > 8) {
         ctx.fillStyle='#000'; ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.font=`bold ${r*0.85}px sans-serif`;
-        const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻'};
+        const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻',hplus:'H⁺',ominus:'O²⁻',co3:'CO₃²⁻',co2:'CO₂'};
         ctx.fillText(labels[this.type]||'', this.x, this.y);
       }
       ctx.globalAlpha = 1;
@@ -464,7 +495,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
     if (size > 6) {
       ctx.fillStyle='#000'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.font=`bold ${size*0.8}px sans-serif`;
-      const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻'};
+      const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻',hplus:'H⁺',ominus:'O²⁻',co3:'CO₃²⁻',co2:'CO₂'};
       ctx.fillText(labels[type]||'', x, y);
     }
   }
@@ -521,19 +552,28 @@ function drawMeshCtx(c, x, y, w, h, color) {
     }));
   }
 
-  // 陰極近傍に漂ってきた H₂O を自然消費（拡散モデル）
-  function checkH2OProximity() {
-    if(cQ.h2o >= 5) return;
+  function spawnAmbientHplus() {
+    const x = ELEC_L + 10 + Math.random() * (ELEC_R - ELEC_L - 20);
+    const y = TOP + 10 + Math.random() * (BOT - TOP - 20);
+    particles.push(new Particle('hplus', x, y, {
+      vx:(Math.random()-0.5)*1.0, vy:(Math.random()-0.5)*1.0,
+      ambient:true, alpha:0.35
+    }));
+  }
+
+  // 陰極近傍に漂ってきた H₂O や CO₂ を自然消費（拡散モデル）
+  function checkAmbientProximity() {
     const nC = (CATWALL_L + CATWALL_R) / 2;
-    const thresh = 100;
     for(let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
-      if(p.type !== 'h2o' || !p.ambient || p.dead) continue;
+      if(!p.ambient || p.dead) continue;
       const dx = Math.abs(nC - p.x);
       if(dx < 60) {
-        p.dead = true;
-        if(cQ.h2o < 6) cQ.h2o++;
-        if(cQ.h2o >= 5) break;
+        if(p.type === 'h2o' && currentFCType === 'AFC' && cQ.h2o < 6) {
+          p.dead = true; cQ.h2o++;
+        } else if (p.type === 'co2' && currentFCType === 'MCFC' && (cQ.co2||0) < 6) {
+          p.dead = true; cQ.co2 = (cQ.co2||0)+1;
+        }
       }
     }
   }
@@ -546,20 +586,52 @@ function drawMeshCtx(c, x, y, w, h, color) {
       particles.push(new Particle('elec',nA,MID,{
         trailLen:12,
         waypoints:[{x:nA,y:WIRE_Y},{x:nC,y:WIRE_Y},{x:nC,y:MID+(Math.random()-0.5)*20}],
-        onReach:null // 既に到達処理済み
+        onReach:null
       }));
     }
-    // 陽極反応で生じた H₂O 2個 → 電解液全体に拡散（電荷なしなので陰極へは向かわない）
-    for(let k=0;k<2;k++){
-      const _tx = ANODE_L + 20 + Math.random() * (CATH_R - ANODE_L - 40);
-      const _ty = MID + (Math.random()-0.5)*130;
-      particles.push(new Particle('h2o', (ANOWALL_L+ANOWALL_R)/2, MID, {
-        seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:1.2, trailLen:6,
-        onReach:(p)=>{
-          p.ambient=true; p.seeking=false;
-          p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5;
-          p.alpha=0.4;
+    
+    if (currentFCType === 'AFC') {
+      for(let k=0;k<2;k++){
+        const _tx = nA + 10 + Math.random() * 40;
+        const _ty = MID + (Math.random()-0.5)*80;
+        particles.push(new Particle('h2o', nA, MID, {
+          seeking:true, targetX:_tx, targetY:_ty, seekSpeed:1.2, trailLen:6,
+          onReach:(p)=>{ p.ambient=true; p.seeking=false; p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5; p.alpha=0.4; }
+        }));
+      }
+    } else if (currentFCType === 'PEFC') {
+      for(let k=0;k<2;k++){
+        particles.push(new Particle('hplus', nA, MID, {
+          seeking:true, targetX:nC, targetY:MID+(Math.random()-0.5)*40, seekSpeed:5.0, trailLen:8,
+          onReach:()=>{ cQ.hplus = (cQ.hplus||0)+1; }
+        }));
+      }
+    } else if (currentFCType === 'SOFC') {
+      const _tx = nA + 10 + Math.random() * 40;
+      const _ty = MID + (Math.random()-0.5)*80;
+      particles.push(new Particle('h2o', nA, MID, {
+        seeking:true, targetX:_tx, targetY:_ty, seekSpeed:1.2, trailLen:6,
+        onReach:(p)=>{ p.ambient=true; p.seeking=false; p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5; p.alpha=0.4; }
+      }));
+    } else if (currentFCType === 'MCFC') {
+      particles.push(new Particle('h2o', nA, MID, {
+        seeking:true, targetX:nA+10+Math.random()*40, targetY:MID+(Math.random()-0.5)*80, seekSpeed:1.2, trailLen:6,
+        onReach:(p)=>{ p.ambient=true; p.seeking=false; p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5; p.alpha=0.4; }
+      }));
+      particles.push(new Particle('co2', nA, MID, {
+        waypoints: [
+          {x: nA, y: TOP - 10},
+          {x: nA - 30, y: TOP - 10},
+          {x: nA - 30, y: TOP - 45},
+          {x: nC + 30, y: TOP - 45},
+          {x: nC + 30, y: TOP - 10},
+          {x: nC + 10 + Math.random()*20, y: TOP + 20 + Math.random()*20}
+        ],
+        wpSpeed: 2.5, trailLen: 6,
+        onReach:(p)=>{ 
+          p.ambient = true; p.seeking = false; 
+          p.vx = (Math.random()-0.5)*1.0; p.vy = 1.0 + Math.random(); 
+          p.alpha = 0.35; 
         }
       }));
     }
@@ -568,33 +640,62 @@ function drawMeshCtx(c, x, y, w, h, color) {
   function triggerCathodeReaction() {
     const nC=(CATWALL_L+CATWALL_R)/2, nA=(ANOWALL_L+ANOWALL_R)/2;
     flashes.push({x:nC,y:MID,life:1.0,color:'#60a5fa'});
-    for(let i=0;i<4;i++) {
-      particles.push(new Particle('oh',nC,MID,{
+    
+    if (currentFCType === 'AFC') {
+      for(let i=0;i<2;i++) {
+        particles.push(new Particle('oh',nC,MID,{
+          seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+          onReach:()=>{aQ.oh=(aQ.oh||0)+1;}
+        }));
+      }
+    } else if (currentFCType === 'PEFC') {
+      particles.push(new Particle('h2o', nC, MID, {
+        seeking:true, targetX:nC-10-Math.random()*40, targetY:MID+(Math.random()-0.5)*80, seekSpeed:1.2, trailLen:6,
+        onReach:(p)=>{ p.ambient=true; p.seeking=false; p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5; p.alpha=0.4; }
+      }));
+    } else if (currentFCType === 'SOFC') {
+      particles.push(new Particle('ominus',nC,MID,{
         seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
-        onReach:()=>{aQ.oh++;}
+        onReach:()=>{aQ.ominus=(aQ.ominus||0)+1;}
+      }));
+    } else if (currentFCType === 'MCFC') {
+      particles.push(new Particle('co3',nC,MID,{
+        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+        onReach:()=>{aQ.co3=(aQ.co3||0)+1;}
       }));
     }
   }
 
   function checkReactions() {
-    if(aQ.h2>=1&&aQ.oh>=2){aQ.h2-=1;aQ.oh-=2;triggerAnodeReaction();}
-    if(cQ.o2>=1&&cQ.e>=4&&cQ.h2o>=2){cQ.o2-=1;cQ.e-=4;cQ.h2o-=2;triggerCathodeReaction();}
+    if (currentFCType === 'AFC') {
+      if(aQ.h2>=1 && aQ.oh>=2){ aQ.h2-=1; aQ.oh-=2; triggerAnodeReaction(); }
+      if(cQ.o2>=1 && cQ.e>=2 && cQ.h2o>=1){ cQ.o2-=1; cQ.e-=2; cQ.h2o-=1; triggerCathodeReaction(); }
+    } else if (currentFCType === 'PEFC') {
+      if(aQ.h2>=1 && cQ.e<8){ aQ.h2-=1; triggerAnodeReaction(); }
+      if(cQ.o2>=1 && cQ.e>=2 && (cQ.hplus||0)>=2){ cQ.o2-=1; cQ.e-=2; cQ.hplus-=2; triggerCathodeReaction(); }
+    } else if (currentFCType === 'SOFC') {
+      if(aQ.h2>=1 && (aQ.ominus||0)>=1){ aQ.h2-=1; aQ.ominus-=1; triggerAnodeReaction(); }
+      if(cQ.o2>=1 && cQ.e>=2){ cQ.o2-=1; cQ.e-=2; triggerCathodeReaction(); }
+    } else if (currentFCType === 'MCFC') {
+      if(aQ.h2>=1 && (aQ.co3||0)>=1){ aQ.h2-=1; aQ.co3-=1; triggerAnodeReaction(); }
+      if(cQ.o2>=1 && cQ.e>=2 && (cQ.co2||0)>=1){ cQ.o2-=1; cQ.e-=2; cQ.co2-=1; triggerCathodeReaction(); }
+    }
   }
 
-  let cycleTicksH2=160, cycleTicksO2=160, cycleTicksH2O=160;
+  let cycleTicksH2=160, cycleTicksO2=160, cycleTicksH2O=160, cycleTicksCO2=160;
   function updateSpawns() {
     for(let i=scheduledSpawns.length-1;i>=0;i--){
       scheduledSpawns[i].timeLeft-=speed;
       if(scheduledSpawns[i].timeLeft<=0){scheduledSpawns[i].execute();scheduledSpawns.splice(i,1);}
     }
     
-    // ガス供給が完全に止まらないようにベース速度を保証（引き込みは物理的なので電流0でも進む）
     const baseSpeed = Math.max(1.0, speed);
     
-    // 反応効率に応じてガス生成（引き込み）の頻度を変える（全体的に頻度を3倍にアップ）
-    cycleTicksH2 += baseSpeed * Math.max(0.1, effAnode) * 3.0;
-    cycleTicksO2 += baseSpeed * Math.max(0.1, effCathode) * 3.0;
+    let spawnRateMod = (currentFCType === 'PEFC') ? 6.0 : 3.0;
+    cycleTicksH2 += baseSpeed * Math.max(0.1, effAnode) * spawnRateMod;
+    cycleTicksO2 += baseSpeed * Math.max(0.1, effCathode) * spawnRateMod;
     cycleTicksH2O += baseSpeed * 1.5;
+    cycleTicksCO2 += baseSpeed * 1.5;
 
     if(cycleTicksH2>=160){
       cycleTicksH2-=160;
@@ -611,9 +712,33 @@ function drawMeshCtx(c, x, y, w, h, color) {
     }
     if(cycleTicksH2O>=160){
       cycleTicksH2O-=160;
-      // H₂O はアンビエントとして補充（消費されて減った分を補う）
       const h2oCount = particles.filter(p=>p.type==='h2o'&&p.ambient&&!p.dead).length;
-      if(h2oCount < 35){ spawnAmbientH2O(); scheduleSpawn(20,spawnAmbientH2O); scheduleSpawn(40,spawnAmbientH2O); }
+      if(currentFCType === 'AFC') {
+        if(h2oCount < 35){ spawnAmbientH2O(); scheduleSpawn(20,spawnAmbientH2O); scheduleSpawn(40,spawnAmbientH2O); }
+      } else if(currentFCType === 'PEFC') {
+        if(h2oCount < 35){ spawnAmbientH2O(); scheduleSpawn(20,spawnAmbientH2O); }
+        const hplusCount = particles.filter(p=>p.type==='hplus'&&p.ambient&&!p.dead).length;
+        if(hplusCount < 30){ spawnAmbientHplus(); scheduleSpawn(20,spawnAmbientHplus); scheduleSpawn(40,spawnAmbientHplus); }
+      }
+    }
+    if(cycleTicksCO2>=160 && currentFCType === 'MCFC'){
+      cycleTicksCO2-=160;
+      const co2Count = particles.filter(p=>p.type==='co2'&&p.ambient&&!p.dead).length;
+      if(co2Count < 25) {
+        // カソード内全体に均等にスポーン
+        const spawnX = CATWALL_R + 10 + Math.random()*(CATH_R - CATWALL_R - 20);
+        particles.push(new Particle('co2', spawnX, TOP - 10, {
+          vx:(Math.random()-0.5)*1.0, vy:1.0+Math.random(), ambient:true, alpha:0.35
+        }));
+      }
+      const co3Count = particles.filter(p=>p.type==='co3'&&p.ambient&&!p.dead).length;
+      if(co3Count < 25) {
+        const spawnX = ELEC_L + 10 + Math.random()*(ELEC_R - ELEC_L - 20);
+        const spawnY = TOP + 10 + Math.random()*(BOT - TOP - 20);
+        particles.push(new Particle('co3', spawnX, spawnY, {
+          vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5, ambient:true, alpha:0.3
+        }));
+      }
     }
   }
 
@@ -719,7 +844,33 @@ function drawMeshCtx(c, x, y, w, h, color) {
     ctx.fillText('外部回路（モーターなど）',W/2,WIRE_Y+28);
     ctx.font='bold 15px sans-serif';ctx.fillStyle='#f87171';ctx.fillText('負極（アノード）',nA,TOP-18);
     ctx.font='bold 15px sans-serif';ctx.fillStyle='#60a5fa';ctx.fillText('正極（カソード）',nC,TOP-18);
-    ctx.font='bold 14px sans-serif';ctx.fillStyle='#34d399';ctx.fillText('電解液（KOH水溶液）',W/2,TOP-18);
+    let elecText = '電解質';
+    if (currentFCType === 'AFC') elecText = '電解液（KOH水溶液）';
+    else if (currentFCType === 'PEFC') elecText = '電解質（高分子隔膜）';
+    else if (currentFCType === 'SOFC') elecText = '電解質（固体酸化物）';
+    else if (currentFCType === 'MCFC') elecText = '電解質（溶融炭酸塩）';
+    ctx.font='bold 14px sans-serif';ctx.fillStyle='#34d399';ctx.fillText(elecText,W/2,TOP-18);
+
+    if (currentFCType === 'MCFC') {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.lineDashOffset = -(t * 2.0 * speed) % 20;
+      ctx.beginPath();
+      ctx.moveTo(nA - 30, TOP - 5);
+      ctx.lineTo(nA - 30, TOP - 45);
+      ctx.lineTo(nC + 30, TOP - 45);
+      ctx.lineTo(nC + 30, TOP - 5);
+      ctx.stroke();
+      // Arrow heads
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath(); ctx.moveTo(nC+30, TOP-5); ctx.lineTo(nC+25, TOP-12); ctx.lineTo(nC+35, TOP-12); ctx.fill();
+      
+      ctx.font = '11px sans-serif'; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'center';
+      ctx.fillText('CO₂ 循環ライン', W / 2, TOP - 52);
+      ctx.restore();
+    }
 
     const T_k=273.15+currentTemp;
     const T_ref = 298.15;
@@ -732,7 +883,12 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const arrheniusReaction = Math.exp((Ea_Reaction / R_gas) * (1/T_k - 1/T_ref));
     const arrheniusDiffusion = Math.exp((Ea_Diffusion / R_gas) * (1/T_k - 1/T_ref));
 
-    const EMF=1.229-0.000846*(T_k-T_ref);
+    let EMF = 1.229;
+    if (currentFCType === 'MCFC' || currentFCType === 'SOFC' || currentTemp >= 100) {
+      EMF = 1.183 - 0.00023 * (T_k - T_ref);
+    } else {
+      EMF = 1.229 - 0.000846 * (T_k - T_ref);
+    }
     const R_load=1000.0;
     const totalH2 = (window.sharedGas.h2 || 0) + (aQ.h2 || 0);
     const totalO2 = (window.sharedGas.o2 || 0) + (cQ.o2 || 0);
@@ -787,39 +943,160 @@ function drawMeshCtx(c, x, y, w, h, color) {
 
   function initSystem() {
     particles=[]; scheduledSpawns=[]; flashes=[];
-    cycleTicksH2=160; cycleTicksO2=160; cycleTicksH2O=160;
-    aQ.h2=0;aQ.oh=0; cQ.o2=0;cQ.e=0;cQ.h2o=0;
+    cycleTicksH2=160; cycleTicksO2=160; cycleTicksH2O=160; cycleTicksCO2=160;
+    aQ={h2:0, oh:0, ominus:0, co3:0}; 
+    cQ={o2:0, e:0, h2o:0, hplus:0, co2:0};
     const nA=(ANOWALL_L+ANOWALL_R)/2;
-    for(let i=0;i<8;i++){
-      particles.push(new Particle('oh',CATWALL_L-20-i*30,MID+(Math.random()-0.5)*80,{
-        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
-        onReach:()=>{aQ.oh++;}
-      }));
-    }
-    for(let i=0;i<6;i++){
-      particles.push(new Particle('oh',ELEC_L+20+Math.random()*150,MID+(Math.random()-0.5)*120,{
-        vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,ambient:true,alpha:0.3
-      }));
-    }
-    // H₂O はセル全体に豊富に存在（水溶液なので電極室も含む）
-    for(let i=0;i<40;i++){
-      const _x = ANODE_L + 10 + Math.random() * (CATH_R - ANODE_L - 20);
-      const _y = TOP + 10 + Math.random() * (BOT - TOP - 20);
-      particles.push(new Particle('h2o',_x,_y,{
-        vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.3
-      }));
+    const nC=(CATWALL_L+CATWALL_R)/2;
+    
+    if (currentFCType === 'AFC') {
+      for(let i=0;i<8;i++){
+        particles.push(new Particle('oh',CATWALL_L-20-i*30,MID+(Math.random()-0.5)*80,{
+          seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+          onReach:()=>{aQ.oh++;}
+        }));
+      }
+      for(let i=0;i<6;i++){
+        particles.push(new Particle('oh',ELEC_L+20+Math.random()*150,MID+(Math.random()-0.5)*120,{
+          vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,ambient:true,alpha:0.3
+        }));
+      }
+      for(let i=0;i<40;i++){
+        particles.push(new Particle('h2o',ANODE_L+10+Math.random()*(CATH_R-ANODE_L-20),TOP+10+Math.random()*(BOT-TOP-20),{
+          vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.3
+        }));
+      }
+    } else if (currentFCType === 'PEFC') {
+      for(let i=0;i<8;i++){
+        particles.push(new Particle('hplus',ANOWALL_R+20+i*30,MID+(Math.random()-0.5)*80,{
+          seeking:true,targetX:nC,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+          onReach:()=>{cQ.hplus=(cQ.hplus||0)+1;}
+        }));
+      }
+      for(let i=0;i<30;i++){
+        particles.push(new Particle('hplus',ELEC_L+20+Math.random()*150,MID+(Math.random()-0.5)*120,{
+          vx:(Math.random()-0.5)*0.8,vy:(Math.random()-0.5)*0.8,ambient:true,alpha:0.4
+        }));
+      }
+      for(let i=0;i<30;i++){
+        particles.push(new Particle('h2o',ANODE_L+10+Math.random()*(CATH_R-ANODE_L-20),TOP+10+Math.random()*(BOT-TOP-20),{
+          vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.3
+        }));
+      }
+    } else if (currentFCType === 'SOFC') {
+      for(let i=0;i<8;i++){
+        particles.push(new Particle('ominus',CATWALL_L-20-i*30,MID+(Math.random()-0.5)*80,{
+          seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+          onReach:()=>{aQ.ominus=(aQ.ominus||0)+1;}
+        }));
+      }
+      // SOFC の固体酸化物（セラミック）格子を表現するため、アンビエントな酸化物イオンを格子状に配置
+      const cols = 9;
+      const rows = 7;
+      const xStep = (ELEC_R - ELEC_L) / cols;
+      const yStep = (BOT - TOP) / rows;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const px = ELEC_L + xStep / 2 + c * xStep + (Math.random()-0.5)*12;
+          const py = TOP + yStep / 2 + r * yStep + (Math.random()-0.5)*12;
+          // 約20%の確率で空孔（vacancy）として配置
+          const isVacancy = Math.random() < 0.2;
+          const pType = isVacancy ? 'vacancy' : 'ominus';
+          particles.push(new Particle(pType, px, py, {
+            vx: 0, vy: 0, ambient: true, alpha: 0.35, size: 9
+          }));
+        }
+      }
+    } else if (currentFCType === 'MCFC') {
+      for(let i=0;i<8;i++){
+        particles.push(new Particle('co3',CATWALL_L-20-i*30,MID+(Math.random()-0.5)*80,{
+          seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
+          onReach:()=>{aQ.co3=(aQ.co3||0)+1;}
+        }));
+      }
+      for(let i=0;i<25;i++){
+        const spawnX = CATWALL_R + 10 + Math.random()*(CATH_R - CATWALL_R - 20);
+        const spawnY = TOP + 10 + Math.random()*(BOT - TOP - 20);
+        particles.push(new Particle('co2', spawnX, spawnY, {
+          vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,ambient:true,alpha:0.35
+        }));
+      }
+      for(let i=0;i<25;i++){
+        const spawnX = ELEC_L + 10 + Math.random()*(ELEC_R - ELEC_L - 20);
+        const spawnY = TOP + 10 + Math.random()*(BOT - TOP - 20);
+        particles.push(new Particle('co3', spawnX, spawnY, {
+          vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,ambient:true,alpha:0.35
+        }));
+      }
     }
   }
 
   function loop(ts) {
     if(!running || window.activeTab !== 'afc'){animId=requestAnimationFrame(loop);return;}
     t+=speed;
-    updateSpawns(); checkReactions(); checkH2OProximity();
+    updateSpawns(); checkReactions(); checkAmbientProximity();
     particles.forEach(p=>p.update());
     particles=particles.filter(p=>!p.dead);
     drawSystem(); drawWireCurrent(); drawFlashes();
     particles.forEach(p=>p.draw()); drawQueues();
     animId=requestAnimationFrame(loop);
+  }
+
+  function updateReactionUI() {
+    const eqAnode = document.getElementById('afc-eq-anode');
+    const eqCathode = document.getElementById('afc-eq-cathode');
+    const eqTotal = document.getElementById('afc-eq-total');
+    const legend = document.getElementById('afc-legend');
+    
+    let anodeHTML = '', cathodeHTML = '', totalHTML = '';
+    let legendHTML = `
+      <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#facc15;box-shadow:0 0 10px #facc15;"></div>e⁻（電子）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#67e8f9;box-shadow:0 0 10px #67e8f9;"></div>H₂O（水分子）</div>
+    `;
+
+    if (currentFCType === 'AFC') {
+      anodeHTML = 'H₂ + 2 OH⁻ → 2 H₂O + 2 e⁻';
+      cathodeHTML = '½ O₂ + H₂O + 2 e⁻ → 2 OH⁻';
+      totalHTML = 'H₂ + ½ O₂ → H₂O';
+      legendHTML += `<div class="legend-item"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 10px #a78bfa;"></div>OH⁻（水酸化物イオン）</div>`;
+    } else if (currentFCType === 'PEFC') {
+      anodeHTML = 'H₂ → 2 H⁺ + 2 e⁻';
+      cathodeHTML = '½ O₂ + 2 H⁺ + 2 e⁻ → H₂O';
+      totalHTML = 'H₂ + ½ O₂ → H₂O';
+      legendHTML += `<div class="legend-item"><div class="legend-dot" style="background:#f43f5e;box-shadow:0 0 10px #f43f5e;"></div>H⁺（水素イオン）</div>`;
+    } else if (currentFCType === 'SOFC') {
+      anodeHTML = 'H₂ + O²⁻ → H₂O + 2 e⁻';
+      cathodeHTML = '½ O₂ + 2 e⁻ → O²⁻';
+      totalHTML = 'H₂ + ½ O₂ → H₂O';
+      legendHTML += `<div class="legend-item"><div class="legend-dot" style="background:#f97316;box-shadow:0 0 10px #f97316;"></div>O²⁻（酸化物イオン）</div>`;
+    } else if (currentFCType === 'MCFC') {
+      anodeHTML = 'H₂ + CO₃²⁻ → H₂O + CO₂ + 2 e⁻';
+      cathodeHTML = '½ O₂ + CO₂ + 2 e⁻ → CO₃²⁻';
+      totalHTML = 'H₂ + ½ O₂ → H₂O';
+      legendHTML += `
+        <div class="legend-item"><div class="legend-dot" style="background:#14b8a6;box-shadow:0 0 10px #14b8a6;"></div>CO₃²⁻（炭酸イオン）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;box-shadow:0 0 10px #94a3b8;"></div>CO₂（二酸化炭素）</div>
+      `;
+    }
+    
+    const tempSlider = document.getElementById('temp-slider');
+    const tempLabel = document.getElementById('temp-label');
+    if (currentFCType === 'AFC' || currentFCType === 'PEFC') {
+      tempSlider.min = "0"; tempSlider.max = "120"; tempSlider.value = "80";
+    } else if (currentFCType === 'MCFC') {
+      tempSlider.min = "500"; tempSlider.max = "800"; tempSlider.value = "650";
+    } else if (currentFCType === 'SOFC') {
+      tempSlider.min = "600"; tempSlider.max = "1200"; tempSlider.value = "800";
+    }
+    currentTemp = parseFloat(tempSlider.value);
+    tempLabel.textContent = currentTemp + ' ℃';
+    
+    eqAnode.innerHTML = anodeHTML;
+    eqCathode.innerHTML = cathodeHTML;
+    eqTotal.innerHTML = totalHTML;
+    legend.innerHTML = legendHTML;
   }
 
   document.getElementById('afc-btn-play').onclick  = ()=>{running=true;};
@@ -835,6 +1112,14 @@ function drawMeshCtx(c, x, y, w, h, color) {
   setupSlider('eff-ion',    'eff-ion-label',     v=>effIon=v);
   setupSlider('eff-cathode','eff-cathode-label', v=>effCathode=v);
 
+  const typeSelect = document.getElementById('fc-type-select');
+  typeSelect.addEventListener('change', (e) => {
+    currentFCType = e.target.value;
+    updateReactionUI();
+    initSystem();
+  });
+
+  updateReactionUI();
   initSystem();
   animId=requestAnimationFrame(loop);
 })();
@@ -870,9 +1155,9 @@ function drawMeshCtx(c, x, y, w, h, color) {
   let elParticles = [], elFlashes = [], elScheduled = [];
 
 
-
-  const anoQ = { oh: 0 };
-  const catQ = { h2o: 0, e: 0 };
+  let currentElType = 'alkaline';
+  let anoQ = { oh: 0, h2o: 0 };
+  let catQ = { h2o: 0, e: 0, hplus: 0 };
 
   class ElParticle {
     constructor(type, x, y, opts={}) {
@@ -960,7 +1245,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       if(r>8){
         ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
         ctx.font=`bold ${r*0.85}px sans-serif`;
-        const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻'};
+        const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻',hplus:'H⁺'};
         ctx.fillText(labels[this.type]||'',this.x,this.y);
       }
       ctx.globalAlpha=1;
@@ -974,7 +1259,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
     if(size>6){
       ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.font=`bold ${size*0.8}px sans-serif`;
-      const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻'};
+      const labels={h2:'H₂',o2:'O₂',oh:'OH⁻',h2o:'H₂O',elec:'e⁻',hplus:'H⁺'};
       ctx.fillText(labels[type]||'',x,y);
     }
   }
@@ -1041,7 +1326,9 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const r=9,gap=r*2.2;
     const nAno=(ANOWALL_L+ANOWALL_R)/2, nCat=(CATWALL_L+CATWALL_R)/2;
     for(let i=0;i<anoQ.oh;i++) elDrawDockedParticle('oh',nAno,MID-((anoQ.oh-1)*gap)/2+i*gap,r);
+    for(let i=0;i<(anoQ.h2o||0);i++) elDrawDockedParticle('h2o',nAno,MID-(((anoQ.h2o||0)-1)*gap)/2+i*gap,r);
     for(let i=0;i<catQ.h2o;i++) elDrawDockedParticle('h2o',nCat-12,MID-((catQ.h2o-1)*gap)/2+i*gap,r);
+    for(let i=0;i<(catQ.hplus||0);i++) elDrawDockedParticle('hplus',nCat-12,MID-(((catQ.hplus||0)-1)*gap)/2+i*gap,r);
     for(let i=0;i<catQ.e;i++)   elDrawDockedParticle('elec',nCat+12,MID-((catQ.e-1)*(r*1.8))/2+i*(r*1.8),7.5);
   }
 
@@ -1068,43 +1355,23 @@ function drawMeshCtx(c, x, y, w, h, color) {
     }));
   }
 
-  function elCheckOHProximity() {
-    if(anoQ.oh >= 8) return;
+  function elCheckAmbientProximity() {
     const nAno = (ANOWALL_L + ANOWALL_R) / 2;
-    const thresh = 100;
-    for(let i = elParticles.length - 1; i >= 0; i--) {
-      const p = elParticles[i];
-      if(p.type !== 'oh' || !p.ambient || p.dead) continue;
-      const dx = Math.abs(nAno - p.x);
-      if(dx < 80) {
-        p.dead = true;
-        if(anoQ.oh < 8) anoQ.oh++;
-        if(anoQ.oh >= 8) break;
-      }
-    }
-  }
-
-  function spawnAmbientH2O() {
-    const x = CAT_L + 10 + Math.random() * (ANO_R - CAT_L - 20);
-    const y = TOP  + 10 + Math.random() * (BOT - TOP - 20);
-    elParticles.push(new ElParticle('h2o', x, y, {
-      vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5,
-      ambient:true, alpha:0.35
-    }));
-  }
-
-  function elCheckH2OProximity() {
-    if(catQ.h2o >= 5) return;
     const nCat = (CATWALL_L + CATWALL_R) / 2;
-    const thresh = 100;
     for(let i = elParticles.length - 1; i >= 0; i--) {
       const p = elParticles[i];
-      if(p.type !== 'h2o' || !p.ambient || p.dead) continue;
-      const dx = Math.abs(nCat - p.x);
-      if(dx < 60) {
-        p.dead = true;
-        if(catQ.h2o < 6) catQ.h2o++;
-        if(catQ.h2o >= 5) break;
+      if(!p.ambient || p.dead) continue;
+      if (currentElType === 'alkaline') {
+        if (p.type === 'oh' && Math.abs(nAno - p.x) < 80) {
+          p.dead = true; if(anoQ.oh < 8) anoQ.oh++;
+        }
+        if (p.type === 'h2o' && Math.abs(nCat - p.x) < 60) {
+          p.dead = true; if(catQ.h2o < 6) catQ.h2o++;
+        }
+      } else if (currentElType === 'acidic') {
+        if (p.type === 'h2o' && Math.abs(nAno - p.x) < 60) {
+          p.dead = true; if((anoQ.h2o||0) < 6) anoQ.h2o = (anoQ.h2o||0)+1;
+        }
       }
     }
   }
@@ -1116,24 +1383,34 @@ function drawMeshCtx(c, x, y, w, h, color) {
       // 酸素は右側（陽極の貯留部）に向かって浮上するように vx を正方向に
       vx: 0.8 + Math.random()*0.4, vy:-1.5, rising:true, trailLen:6, size:13
     }));
-    for(let k=0;k<2;k++){
-      const _tx = CATWALL_R + 20 + Math.random()*(ANOWALL_L - CATWALL_R - 40);
-      const _ty = MID + (Math.random()-0.5)*130;
-      elParticles.push(new ElParticle('h2o',nAno,MID,{
-        seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:1.2, trailLen:6,
-        onReach:(p)=>{
-          p.ambient=true; p.seeking=false;
-          p.vx=(Math.random()-0.5)*0.4; p.vy=(Math.random()-0.5)*0.4;
-          p.alpha=0.4;
-        }
-      }));
+    if (currentElType === 'alkaline') {
+      for(let k=0;k<2;k++){
+        const _tx = nAno - 10 - Math.random() * 40; // 移動距離を短く（アノード付近に留まる）
+        const _ty = MID + (Math.random()-0.5)*80;
+        elParticles.push(new ElParticle('h2o',nAno,MID,{
+          seeking:true, targetX:_tx, targetY:_ty,
+          seekSpeed:1.2, trailLen:6,
+          onReach:(p)=>{
+            p.ambient=true; p.seeking=false;
+            p.vx=(Math.random()-0.5)*0.4; p.vy=(Math.random()-0.5)*0.4;
+            p.alpha=0.4;
+          }
+        }));
+      }
+    } else if (currentElType === 'acidic') {
+      for(let k=0;k<4;k++){
+        const _ty = MID + (Math.random()-0.5)*(BOT - TOP - 30);
+        elParticles.push(new ElParticle('hplus', nAno, MID, {
+          seeking:true, targetX:nCat, targetY:_ty, seekSpeed:4.5, trailLen:8,
+          onReach:(p)=>{ /* Visual only */ }
+        }));
+      }
     }
+    
     for(let i=0;i<4;i++){
       catQ.e++; // 電子の論理的な到達を「遅延ゼロ（一瞬）」で行う
       elParticles.push(new ElParticle('elec',nAno,MID,{
-        trailLen:12,
-        wpSpeed:2.2,
+        trailLen:12, wpSpeed:2.2,
         waypoints:[
           {x:nAno, y:WIRE_Y},
           {x:nCat, y:WIRE_Y},
@@ -1151,50 +1428,76 @@ function drawMeshCtx(c, x, y, w, h, color) {
       // 水素は左側（陰極の貯留部）に向かって浮上するように vx を負方向に
       vx: -0.8 - Math.random()*0.4, vy:-1.5, rising:true, trailLen:6, size:13
     }));
-    for(let i=0;i<2;i++){
-      const _ty = MID + (Math.random()-0.5)*(BOT - TOP - 30);
-      elParticles.push(new ElParticle('oh', nCat, MID, {
-        seeking:true, targetX:nAno, targetY:_ty,
-        seekSpeed:4.5, trailLen:8,
-        onReach:(p)=>{
-          // 視覚的な表現のみ（キューの増加は extraCaptures が担うため二重カウントしない）
-        }
-      }));
+    if (currentElType === 'alkaline') {
+      for(let i=0;i<2;i++){
+        const _ty = MID + (Math.random()-0.5)*(BOT - TOP - 30);
+        elParticles.push(new ElParticle('oh', nCat, MID, {
+          seeking:true, targetX:nAno, targetY:_ty, seekSpeed:4.5, trailLen:8,
+          onReach:(p)=>{ /* Visual only */ }
+        }));
+      }
     }
   }
 
   function elCheckReactions() {
-    if(anoQ.oh >= 4){ anoQ.oh -= 4; triggerAnodeReaction(); }
-    if(catQ.h2o>=2 && catQ.e>=2){ catQ.h2o-=2; catQ.e-=2; triggerCathodeReaction(); }
+    if (currentElType === 'alkaline') {
+      if(anoQ.oh >= 4 && catQ.e < 8){ anoQ.oh -= 4; triggerAnodeReaction(); }
+      if(catQ.h2o>=2 && catQ.e>=2){ catQ.h2o-=2; catQ.e-=2; triggerCathodeReaction(); }
+    } else if (currentElType === 'acidic') {
+      if((anoQ.h2o||0) >= 2 && catQ.e < 8){ anoQ.h2o -= 2; triggerAnodeReaction(); }
+      if((catQ.hplus||0)>=2 && catQ.e>=2){ catQ.hplus-=2; catQ.e-=2; triggerCathodeReaction(); }
+    }
   }
 
   let elSpawnTicks = 100;
   let elCaptureTicks = 100;
   function elUpdateSpawns() {
-    // 発生スケジュールは電圧（elSpeed）に依存せず一定ペース
     for(let i=elScheduled.length-1;i>=0;i--){
       elScheduled[i].timeLeft -= 1.0;
       if(elScheduled[i].timeLeft<=0){elScheduled[i].execute();elScheduled.splice(i,1);}
     }
     
-    // 粒子の発生（放射）も一定ペース
     elSpawnTicks += 1.0;
     if(elSpawnTicks >= 100){
       elSpawnTicks -= 100;
-      const ohCount = elParticles.filter(p=>p.type==='oh'&&p.ambient&&!p.dead).length;
-      if(ohCount < 20){ spawnAmbientOH(); elScheduleSpawn(20,spawnAmbientOH); elScheduleSpawn(40,spawnAmbientOH); }
-      const h2oCount = elParticles.filter(p=>p.type==='h2o'&&p.ambient&&!p.dead).length;
-      if(h2oCount < 35){ spawnAmbientH2O(); elScheduleSpawn(20,spawnAmbientH2O); elScheduleSpawn(40,spawnAmbientH2O); }
+      if (currentElType === 'alkaline') {
+        const ohCount = elParticles.filter(p=>p.type==='oh'&&p.ambient&&!p.dead).length;
+        if(ohCount < 20){ spawnAmbientOH(); elScheduleSpawn(20,spawnAmbientOH); elScheduleSpawn(40,spawnAmbientOH); }
+        
+        const h2oCount = elParticles.filter(p=>p.type==='h2o'&&p.ambient&&!p.dead).length;
+        if(h2oCount < 35){ 
+          const spawnAmbientH2OCat = () => {
+            const x = CAT_L + 10 + Math.random() * (ANO_R - CAT_L - 20);
+            const y = TOP  + 10 + Math.random() * (BOT - TOP - 20);
+            elParticles.push(new ElParticle('h2o', x, y, { vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, ambient:true, alpha:0.35 }));
+          };
+          spawnAmbientH2OCat(); elScheduleSpawn(20,spawnAmbientH2OCat); elScheduleSpawn(40,spawnAmbientH2OCat); 
+        }
+      } else if (currentElType === 'acidic') {
+        const h2oCount = elParticles.filter(p=>p.type==='h2o'&&p.ambient&&!p.dead).length;
+        if(h2oCount < 35){
+          const spawnAmbientH2OAno = () => {
+            const x = ELEC_L + 10 + Math.random() * (ELEC_R - ELEC_L - 20);
+            const y = TOP + 10 + Math.random() * (BOT - TOP - 20);
+            elParticles.push(new ElParticle('h2o', x, y, { vx:(Math.random()-0.5)*1.5, vy:(Math.random()-0.5)*1.5, ambient:true, alpha:0.35 }));
+          };
+          spawnAmbientH2OAno(); elScheduleSpawn(20,spawnAmbientH2OAno); elScheduleSpawn(40,spawnAmbientH2OAno);
+        }
+      }
     }
 
-    // 反応キューへの強制キャプチャ（反応頻度）のみ電圧に比例して加速
     elCaptureTicks += elSpeed;
     if(elCaptureTicks >= 100){
       elCaptureTicks -= 100;
       const extraCaptures = Math.floor(elSpeed * 1.5);
       for(let k=0; k<extraCaptures; k++) {
-        if(anoQ.oh < 8) { anoQ.oh++; }
-        if(catQ.h2o < 6) { catQ.h2o++; }
+        if (currentElType === 'alkaline') {
+          if(anoQ.oh < 8) anoQ.oh++;
+          if(catQ.h2o < 6) catQ.h2o++;
+        } else if (currentElType === 'acidic') {
+          if((anoQ.h2o||0) < 6) anoQ.h2o = (anoQ.h2o||0)+1;
+          if((catQ.hplus||0) < 8) catQ.hplus = (catQ.hplus||0)+2; // 2 H+ pseudo-reach cathode logic
+        }
       }
     }
   }
@@ -1255,13 +1558,22 @@ function drawMeshCtx(c, x, y, w, h, color) {
     ctx.font='bold 15px sans-serif'; ctx.textAlign='center';
     ctx.fillStyle='#60a5fa'; ctx.fillText('陰極（−）',nCat,TOP-18);
     ctx.fillStyle='#f87171'; ctx.fillText('陽極（+）',nAno,TOP-18);
+    let elText = '電解質';
+    if (currentElType === 'alkaline') elText = '電解液（KOH水溶液など）';
+    else if (currentElType === 'acidic') elText = '電解質（PEM・希硫酸など）';
     ctx.font='bold 14px sans-serif'; ctx.fillStyle='#34d399';
-    ctx.fillText('電解液（KOH水溶液）',W/2,TOP-18);
+    ctx.fillText(elText,W/2,TOP-18);
     ctx.font='11px "JetBrains Mono",monospace';
     ctx.fillStyle='rgba(96,165,250,0.85)'; ctx.textAlign='left';
-    ctx.fillText('陰極: 2H₂O + 2e⁻ → H₂ + 2OH⁻', CAT_L+6, BOT-8);
-    ctx.fillStyle='rgba(248,113,113,0.85)'; ctx.textAlign='right';
-    ctx.fillText('陽極: 4OH⁻ → O₂ + 2H₂O + 4e⁻', ANO_R-6, BOT-8);
+    if (currentElType === 'alkaline') {
+      ctx.fillText('陰極: 2H₂O + 2e⁻ → H₂ + 2OH⁻', CAT_L+6, BOT-8);
+      ctx.fillStyle='rgba(248,113,113,0.85)'; ctx.textAlign='right';
+      ctx.fillText('陽極: 4OH⁻ → O₂ + 2H₂O + 4e⁻', ANO_R-6, BOT-8);
+    } else {
+      ctx.fillText('陰極: 2H⁺ + 2e⁻ → H₂', CAT_L+6, BOT-8);
+      ctx.fillStyle='rgba(248,113,113,0.85)'; ctx.textAlign='right';
+      ctx.fillText('陽極: 2H₂O → O₂ + 4H⁺ + 4e⁻', ANO_R-6, BOT-8);
+    }
     ctx.textAlign='center';
     ctx.fillStyle='rgba(74,222,128,0.9)';
     ctx.font='bold 12px sans-serif';
@@ -1296,13 +1608,23 @@ function drawMeshCtx(c, x, y, w, h, color) {
     anoQ.oh=0; catQ.h2o=0; catQ.e=0;
     const nAno=(ANOWALL_L+ANOWALL_R)/2, nCat=(CATWALL_L+CATWALL_R)/2;
 
-    // 初期: OH⁻ を電解質帯にアンビエントとして散布
-    for(let i=0;i<20;i++){
-      const _x = ELEC_L + 10 + Math.random()*(ELEC_R - ELEC_L - 20);
-      const _y = TOP + 10 + Math.random()*(BOT - TOP - 20);
-      elParticles.push(new ElParticle('oh',_x,_y,{
-        vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.45
-      }));
+    // 初期: アンビエントとしてイオンを散布
+    if (currentElType === 'alkaline') {
+      for(let i=0;i<20;i++){
+        const _x = ELEC_L + 10 + Math.random()*(ELEC_R - ELEC_L - 20);
+        const _y = TOP + 10 + Math.random()*(BOT - TOP - 20);
+        elParticles.push(new ElParticle('oh',_x,_y,{
+          vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.45
+        }));
+      }
+    } else if (currentElType === 'acidic') {
+      for(let i=0;i<20;i++){
+        const _x = ELEC_L + 10 + Math.random()*(ELEC_R - ELEC_L - 20);
+        const _y = TOP + 10 + Math.random()*(BOT - TOP - 20);
+        elParticles.push(new ElParticle('hplus',_x,_y,{
+          vx:(Math.random()-0.5)*1.5,vy:(Math.random()-0.5)*1.5,ambient:true,alpha:0.45
+        }));
+      }
     }
     // 初期: H₂O はセル全体に豊富に存在（水溶液なので電極室も含む）
     for(let i=0;i<40;i++){
@@ -1317,7 +1639,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
   function elLoop() {
     if(!elRunning || window.activeTab !== 'elec'){requestAnimationFrame(elLoop);return;}
     elT+=elSpeed;
-    elUpdateSpawns(); elCheckReactions(); elCheckH2OProximity(); elCheckOHProximity();
+    elUpdateSpawns(); elCheckReactions(); elCheckAmbientProximity();
     elParticles.forEach(p=>p.update());
     elParticles=elParticles.filter(p=>!p.dead);
     elDrawSystem(); elDrawWireCurrent(); elDrawFlashes();
@@ -1337,6 +1659,43 @@ function drawMeshCtx(c, x, y, w, h, color) {
     elSpeed=Math.max(0.3, (elVoltage-1.23)*0.65+0.5);
   };
 
+  const elTypeSelect = document.getElementById('el-type-select');
+  const elEqCathode = document.getElementById('el-eq-cathode');
+  const elEqAnode = document.getElementById('el-eq-anode');
+  const elEqTotal = document.getElementById('el-eq-total');
+  const elLegend = document.getElementById('el-legend');
+
+  function updateElReactionUI() {
+    if (currentElType === 'alkaline') {
+      elEqCathode.textContent = '2 H₂O + 2 e⁻ → H₂ + 2 OH⁻';
+      elEqAnode.textContent = '4 OH⁻ → O₂ + 2 H₂O + 4 e⁻';
+      elLegend.innerHTML = `
+        <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;box-shadow:0 0 10px #a78bfa;"></div>OH⁻（水酸化物イオン）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#67e8f9;box-shadow:0 0 10px #67e8f9;"></div>H₂O（水分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#facc15;box-shadow:0 0 10px #facc15;"></div>e⁻（電子）</div>
+      `;
+    } else if (currentElType === 'acidic') {
+      elEqCathode.textContent = '2 H⁺ + 2 e⁻ → H₂';
+      elEqAnode.textContent = '2 H₂O → O₂ + 4 H⁺ + 4 e⁻';
+      elLegend.innerHTML = `
+        <div class="legend-item"><div class="legend-dot" style="background:#fb923c;box-shadow:0 0 10px #fb923c;"></div>H₂（水素分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4ade80;box-shadow:0 0 10px #4ade80;"></div>O₂（酸素分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f472b6;box-shadow:0 0 10px #f472b6;"></div>H⁺（水素イオン）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#67e8f9;box-shadow:0 0 10px #67e8f9;"></div>H₂O（水分子）</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#facc15;box-shadow:0 0 10px #facc15;"></div>e⁻（電子）</div>
+      `;
+    }
+  }
+
+  elTypeSelect.onchange = () => {
+    currentElType = elTypeSelect.value;
+    updateElReactionUI();
+    elInit();
+  };
+
+  updateElReactionUI();
   elInit();
   requestAnimationFrame(elLoop);
 })();
