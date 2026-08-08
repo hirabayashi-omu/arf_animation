@@ -398,7 +398,11 @@ function drawMeshCtx(c, x, y, w, h, color) {
         if (d < 5) {
           this.wpIdx++;
           if (this.wpIdx >= this.waypoints.length) { this.dead = true; if (this.onReach) this.onReach(this); return; }
-        } else { const s = Math.min(3.8*speed, d); this.x += (dx/d)*s; this.y += (dy/d)*s; }
+        } else {
+          // 電子は視覚的にも極めて速く（一瞬で）移動させる
+          const s = (this.type === 'elec') ? Math.min(150, d) : Math.min(3.8*speed, d);
+          this.x += (dx/d)*s; this.y += (dy/d)*s;
+        }
         return;
       }
       if (this.seeking) {
@@ -485,15 +489,19 @@ function drawMeshCtx(c, x, y, w, h, color) {
 
   function spawnH2ToAnode() {
     const nA=(ANOWALL_L+ANOWALL_R)/2;
-    particles.push(new Particle('h2',ANODE_L-20,MID+(Math.random()-0.5)*60,{
-      seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*20,seekSpeed:2.2,trailLen:8,
+    // 水素は上部（TOP-10付近）の貯留場所から電極へ向かう
+    const spawnX = ANODE_L + 10 + Math.random()*(ANOWALL_L - ANODE_L - 20);
+    particles.push(new Particle('h2', spawnX, TOP - 10, {
+      seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*20,seekSpeed:8.0,trailLen:8,
       onReach:()=>{aQ.h2++;}
     }));
   }
   function spawnO2ToCathode() {
     const nC=(CATWALL_L+CATWALL_R)/2;
-    particles.push(new Particle('o2',CATH_R+20,MID+(Math.random()-0.5)*60,{
-      seeking:true,targetX:nC,targetY:MID+(Math.random()-0.5)*20,seekSpeed:2.0,trailLen:8,
+    // 酸素は上部（TOP-10付近）の貯留場所から電極へ向かう
+    const spawnX = CATWALL_R + 10 + Math.random()*(CATH_R - CATWALL_R - 20);
+    particles.push(new Particle('o2', spawnX, TOP - 10, {
+      seeking:true,targetX:nC,targetY:MID+(Math.random()-0.5)*20,seekSpeed:6.0,trailLen:8,
       onReach:()=>{cQ.o2++;}
     }));
   }
@@ -528,10 +536,11 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const nA=(ANOWALL_L+ANOWALL_R)/2, nC=(CATWALL_L+CATWALL_R)/2;
     flashes.push({x:nA,y:MID,life:1.0,color:'#f87171'});
     for(let i=0;i<2;i++) {
+      cQ.e++; // 電子の論理的な到達を「遅延ゼロ（一瞬）」で行う
       particles.push(new Particle('elec',nA,MID,{
         trailLen:12,
         waypoints:[{x:nA,y:WIRE_Y},{x:nC,y:WIRE_Y},{x:nC,y:MID+(Math.random()-0.5)*20}],
-        onReach:()=>{cQ.e++;}
+        onReach:null // 既に到達処理済み
       }));
     }
     // 陽極反応で生じた H₂O 2個 → 電解液全体に拡散（電荷なしなので陰極へは向かわない）
@@ -540,7 +549,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       const _ty = MID + (Math.random()-0.5)*130;
       particles.push(new Particle('h2o', (ANOWALL_L+ANOWALL_R)/2, MID, {
         seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:1.2, trailLen:6,
+        seekSpeed:3.5, trailLen:6,
         onReach:(p)=>{
           p.ambient=true; p.seeking=false;
           p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5;
@@ -555,7 +564,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
     flashes.push({x:nC,y:MID,life:1.0,color:'#60a5fa'});
     for(let i=0;i<4;i++) {
       particles.push(new Particle('oh',nC,MID,{
-        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:1.8,trailLen:8,
+        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
         onReach:()=>{aQ.oh++;}
       }));
     }
@@ -762,7 +771,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const nA=(ANOWALL_L+ANOWALL_R)/2;
     for(let i=0;i<8;i++){
       particles.push(new Particle('oh',CATWALL_L-20-i*30,MID+(Math.random()-0.5)*80,{
-        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:1.8,trailLen:8,
+        seeking:true,targetX:nA,targetY:MID+(Math.random()-0.5)*40,seekSpeed:5.0,trailLen:8,
         onReach:()=>{aQ.oh++;}
       }));
     }
@@ -873,7 +882,8 @@ function drawMeshCtx(c, x, y, w, h, color) {
         if(d<5){this.wpIdx++;if(this.wpIdx>=this.waypoints.length){this.dead=true;if(this.onReach)this.onReach(this);return;}}
         else{
           const _multi = 1.0;
-          const s=Math.min(this.wpSpeed*_multi,d);
+          // 電子は視覚的にも極めて速く（一瞬で）移動させる
+          const s = (this.type === 'elec') ? Math.min(150, d) : Math.min(this.wpSpeed*_multi,d);
           this.x+=(dx/d)*s;this.y+=(dy/d)*s;
         }
         return;
@@ -1082,14 +1092,15 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const nAno=(ANOWALL_L+ANOWALL_R)/2, nCat=(CATWALL_L+CATWALL_R)/2;
     elFlashes.push({x:nAno,y:MID,life:1.0,color:'#f87171'});
     elParticles.push(new ElParticle('o2',nAno,MID,{
-      vx:(Math.random()-0.5)*0.6, vy:-1.5, rising:true, trailLen:6, size:13
+      // 酸素は右側（陽極の貯留部）に向かって浮上するように vx を正方向に
+      vx: 0.8 + Math.random()*0.4, vy:-1.5, rising:true, trailLen:6, size:13
     }));
     for(let k=0;k<2;k++){
       const _tx = CATWALL_R + 20 + Math.random()*(ANOWALL_L - CATWALL_R - 40);
       const _ty = MID + (Math.random()-0.5)*130;
       elParticles.push(new ElParticle('h2o',nAno,MID,{
         seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:1.2, trailLen:6,
+        seekSpeed:3.5, trailLen:6,
         onReach:(p)=>{
           p.ambient=true; p.seeking=false;
           p.vx=(Math.random()-0.5)*0.4; p.vy=(Math.random()-0.5)*0.4;
@@ -1098,6 +1109,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       }));
     }
     for(let i=0;i<4;i++){
+      catQ.e++; // 電子の論理的な到達を「遅延ゼロ（一瞬）」で行う
       elParticles.push(new ElParticle('elec',nAno,MID,{
         trailLen:12,
         wpSpeed:2.2,
@@ -1106,7 +1118,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
           {x:nCat, y:WIRE_Y},
           {x:nCat, y:MID+(Math.random()-0.5)*20}
         ],
-        onReach:()=>{ catQ.e++; }
+        onReach:null // 既に到達処理済み
       }));
     }
   }
@@ -1115,13 +1127,14 @@ function drawMeshCtx(c, x, y, w, h, color) {
     const nCat=(CATWALL_L+CATWALL_R)/2, nAno=(ANOWALL_L+ANOWALL_R)/2;
     elFlashes.push({x:nCat,y:MID,life:1.0,color:'#60a5fa'});
     elParticles.push(new ElParticle('h2',nCat,MID,{
-      vx:(Math.random()-0.5)*0.6, vy:-1.5, rising:true, trailLen:6, size:13
+      // 水素は左側（陰極の貯留部）に向かって浮上するように vx を負方向に
+      vx: -0.8 - Math.random()*0.4, vy:-1.5, rising:true, trailLen:6, size:13
     }));
     for(let i=0;i<2;i++){
       const _ty = MID + (Math.random()-0.5)*(BOT - TOP - 30);
       elParticles.push(new ElParticle('oh', nCat, MID, {
         seeking:true, targetX:nAno, targetY:_ty,
-        seekSpeed:1.5, trailLen:8,
+        seekSpeed:4.5, trailLen:8,
         onReach:(p)=>{
           // 視覚的な表現のみ（キューの増加は extraCaptures が担うため二重カウントしない）
         }
