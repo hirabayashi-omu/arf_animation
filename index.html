@@ -409,11 +409,17 @@ function drawMeshCtx(c, x, y, w, h, color) {
         const dx = this.targetX - this.x, dy = this.targetY - this.y;
         const d  = Math.sqrt(dx*dx + dy*dy);
         if (d < 5) { this.dead = true; if (this.onReach) this.onReach(this); return; }
-        const s = Math.min(this.seekSpeed*speed, d); this.x += (dx/d)*s; this.y += (dy/d)*s;
+        let dynSeekSpeed = this.seekSpeed;
+        if (this.type === 'oh') dynSeekSpeed *= Math.max(0.1, effIon);
+        
+        // 電流が極端に落ちても視覚的に完全にフリーズしないよう最低速度(0.3)を保証
+        const visualSpeed = Math.max(0.3, speed);
+        const s = Math.min(dynSeekSpeed*visualSpeed, d); this.x += (dx/d)*s; this.y += (dy/d)*s;
         return;
       }
       // アンビエント粒子（H₂O）は電圧に依存せず固定速度で漂う
-      const _mv = this.ambient ? 1.0 : speed;
+      let _mv = this.ambient ? 1.0 : speed;
+      if (this.type === 'oh') _mv *= Math.max(0.1, effIon);
       this.x += this.vx*_mv; this.y += this.vy*_mv;
       if (this.ambient) {
         // H₂O はセル全体で漂う、その他イオンは電解質帯内
@@ -549,7 +555,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       const _ty = MID + (Math.random()-0.5)*130;
       particles.push(new Particle('h2o', (ANOWALL_L+ANOWALL_R)/2, MID, {
         seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:3.5, trailLen:6,
+        seekSpeed:1.2, trailLen:6,
         onReach:(p)=>{
           p.ambient=true; p.seeking=false;
           p.vx=(Math.random()-0.5)*1.5; p.vy=(Math.random()-0.5)*1.5;
@@ -575,22 +581,36 @@ function drawMeshCtx(c, x, y, w, h, color) {
     if(cQ.o2>=1&&cQ.e>=4&&cQ.h2o>=2){cQ.o2-=1;cQ.e-=4;cQ.h2o-=2;triggerCathodeReaction();}
   }
 
-  let cycleTicks=160;
+  let cycleTicksH2=160, cycleTicksO2=160, cycleTicksH2O=160;
   function updateSpawns() {
     for(let i=scheduledSpawns.length-1;i>=0;i--){
       scheduledSpawns[i].timeLeft-=speed;
       if(scheduledSpawns[i].timeLeft<=0){scheduledSpawns[i].execute();scheduledSpawns.splice(i,1);}
     }
-    cycleTicks+=speed;
-    if(cycleTicks>=160){
-      cycleTicks-=160;
+    
+    // ガス供給が完全に止まらないようにベース速度を保証（引き込みは物理的なので電流0でも進む）
+    const baseSpeed = Math.max(1.0, speed);
+    
+    // 反応効率に応じてガス生成（引き込み）の頻度を変える（全体的に頻度を3倍にアップ）
+    cycleTicksH2 += baseSpeed * Math.max(0.1, effAnode) * 3.0;
+    cycleTicksO2 += baseSpeed * Math.max(0.1, effCathode) * 3.0;
+    cycleTicksH2O += baseSpeed * 1.5;
+
+    if(cycleTicksH2>=160){
+      cycleTicksH2-=160;
       if(aQ.h2<6 && window.sharedGas.h2 > 0) {
         spawnH2ToAnode(); window.sharedGas.h2--;
         scheduleSpawn(20,()=>{ if(window.sharedGas.h2 > 0) { spawnH2ToAnode(); window.sharedGas.h2--; } });
       }
+    }
+    if(cycleTicksO2>=160){
+      cycleTicksO2-=160;
       if(cQ.o2<3 && window.sharedGas.o2 > 0) {
         scheduleSpawn(10,()=>{ if(window.sharedGas.o2 > 0) { spawnO2ToCathode(); window.sharedGas.o2--; } });
       }
+    }
+    if(cycleTicksH2O>=160){
+      cycleTicksH2O-=160;
       // H₂O はアンビエントとして補充（消費されて減った分を補う）
       const h2oCount = particles.filter(p=>p.type==='h2o'&&p.ambient&&!p.dead).length;
       if(h2oCount < 35){ spawnAmbientH2O(); scheduleSpawn(20,spawnAmbientH2O); scheduleSpawn(40,spawnAmbientH2O); }
@@ -766,7 +786,8 @@ function drawMeshCtx(c, x, y, w, h, color) {
   }
 
   function initSystem() {
-    particles=[]; scheduledSpawns=[]; flashes=[]; cycleTicks=160;
+    particles=[]; scheduledSpawns=[]; flashes=[];
+    cycleTicksH2=160; cycleTicksO2=160; cycleTicksH2O=160;
     aQ.h2=0;aQ.oh=0; cQ.o2=0;cQ.e=0;cQ.h2o=0;
     const nA=(ANOWALL_L+ANOWALL_R)/2;
     for(let i=0;i<8;i++){
@@ -1100,7 +1121,7 @@ function drawMeshCtx(c, x, y, w, h, color) {
       const _ty = MID + (Math.random()-0.5)*130;
       elParticles.push(new ElParticle('h2o',nAno,MID,{
         seeking:true, targetX:_tx, targetY:_ty,
-        seekSpeed:3.5, trailLen:6,
+        seekSpeed:1.2, trailLen:6,
         onReach:(p)=>{
           p.ambient=true; p.seeking=false;
           p.vx=(Math.random()-0.5)*0.4; p.vy=(Math.random()-0.5)*0.4;
